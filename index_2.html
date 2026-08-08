@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Respond-IA — Tu WhatsApp nunca duerme</title>
+<meta name="description" content="Respond-IA responde a los clientes de tu pyme por WhatsApp, al instante, a cualquier hora, con inteligencia artificial entrenada en tu negocio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#090D16;
+    --ink-soft:#121A2C;
+    --ink-line:#243050;
+    --slate:#1B2440;
+    --indigo:#7C6FFF;
+    --indigo-soft:#A79CFF;
+    --cyan:#35E7D2;
+    --muted:#8894AC;
+    --white:#EEF1FA;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:var(--ink);
+    color:var(--white);
+    font-family:'Inter', -apple-system, sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 clamp(24px, 6vw, 88px); }
+  a{ color:inherit; }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--cyan);
+  }
+  h1,h2,h3{ font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.01em; }
+
+  /* NAV */
+  header{
+    position:sticky; top:0; z-index:40;
+    background:rgba(9,13,22,.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--ink-line);
+  }
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 0;
+  }
+  .logo{
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:19px;
+    display:flex; align-items:baseline; gap:2px;
+  }
+  .logo .dash{ color:var(--indigo-soft); }
+  nav .links{ display:flex; gap:32px; font-size:14.5px; color:var(--muted); }
+  nav .links a{ text-decoration:none; transition:color .2s; }
+  nav .links a:hover{ color:var(--white); }
+  .btn{
+    font-family:'Inter', sans-serif; font-weight:600; font-size:14.5px;
+    padding:11px 22px; border-radius:100px; text-decoration:none;
+    display:inline-block; transition:transform .18s ease, opacity .18s ease;
+  }
+  .btn-primary{ background:var(--indigo); color:#0A0714; }
+  .btn-primary:hover{ transform:translateY(-1px); opacity:.92; }
+  .btn-ghost{ border:1px solid var(--ink-line); color:var(--white); }
+  .btn-ghost:hover{ border-color:var(--muted); }
+
+  /* HERO */
+  .hero{
+    padding:100px 0 92px;
+  }
+  .hero .wrap{
+    display:grid; grid-template-columns:1fr .92fr; gap:64px; align-items:center;
+  }
+  .hero-copy{ max-width:480px; }
+  .hero h1{
+    font-size:clamp(34px, 4.4vw, 52px);
+    line-height:1.08;
+    margin:18px 0 22px;
+  }
+  .hero h1 em{ font-style:normal; color:var(--indigo-soft); }
+  .hero p.lead{
+    font-size:17.5px; color:#C4CBDD; margin-bottom:30px;
+  }
+  .hero-actions{ display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+  .hero-note{
+    margin-top:22px; font-family:'IBM Plex Mono', monospace; font-size:12.5px;
+    color:var(--muted);
+  }
+
+  /* CHAT MOCK — signature element */
+  .phone{
+    background:var(--ink-soft);
+    border:1px solid var(--ink-line);
+    border-radius:22px;
+    padding:20px 18px 26px;
+    box-shadow:0 40px 90px -30px rgba(124,111,255,.18), 0 30px 60px -30px rgba(0,0,0,.6);
+    max-width:380px; margin:0 auto;
+  }
+  .phone-head{
+    display:flex; align-items:center; gap:10px;
+    padding-bottom:14px; margin-bottom:16px;
+    border-bottom:1px solid var(--ink-line);
+  }
+  .avatar{
+    width:34px; height:34px; border-radius:50%;
+    background:linear-gradient(135deg, var(--indigo), var(--cyan));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px; color:#0A0714;
+  }
+  .phone-head .name{ font-size:14.5px; font-weight:600; }
+  .phone-head .status{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--cyan);
+  }
+  .bubble-row{ display:flex; margin-bottom:12px; opacity:0; transform:translateY(8px); animation:rise .5s ease forwards; }
+  .bubble-row.them{ justify-content:flex-start; }
+  .bubble-row.me{ justify-content:flex-end; }
+  .bubble{
+    max-width:78%; padding:10px 14px; font-size:14px; border-radius:16px;
+    line-height:1.4;
+  }
+  .them .bubble{ background:var(--slate); color:var(--white); border-bottom-left-radius:4px; }
+  .me .bubble{ background:var(--cyan); color:#052A24; border-bottom-right-radius:4px; }
+  .meta-row{
+    display:flex; align-items:center; gap:5px; margin-top:4px;
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--muted);
+  }
+  .me .meta-row{ justify-content:flex-end; }
+  .check{ color:var(--muted); }
+  .check.seen{ color:var(--indigo-soft); }
+
+  .typing{
+    display:inline-flex; gap:4px; padding:12px 14px; background:var(--slate);
+    border-radius:16px; border-bottom-left-radius:4px;
+    opacity:0; animation:rise .5s ease forwards;
+  }
+  .typing span{
+    width:6px; height:6px; border-radius:50%; background:var(--muted);
+    animation:bounce 1.2s infinite ease-in-out;
+  }
+  .typing span:nth-child(2){ animation-delay:.15s; }
+  .typing span:nth-child(3){ animation-delay:.3s; }
+
+  @keyframes rise{ to{ opacity:1; transform:translateY(0); } }
+  @keyframes bounce{ 0%,60%,100%{ transform:translateY(0); opacity:.5;} 30%{ transform:translateY(-4px); opacity:1;} }
+
+  @media (prefers-reduced-motion: reduce){
+    .bubble-row, .typing{ animation:none; opacity:1; transform:none; }
+    .typing span{ animation:none; }
+  }
+
+  /* SECTIONS */
+  section{ padding:92px 0; border-top:1px solid var(--ink-line); }
+  .section-head{ max-width:580px; margin:0 auto 56px; text-align:left; }
+  .section-head h2{ font-size:clamp(26px,3vw,36px); margin-top:12px; }
+  .section-head p{ color:var(--muted); margin-top:14px; font-size:15.5px; }
+
+  /* PROBLEM */
+  .problem-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
+  .problem-card{
+    background:var(--ink-soft); border:1px solid var(--ink-line);
+    border-radius:16px; padding:28px 26px;
+  }
+  .problem-card .tag{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--indigo-soft); }
+  .problem-card p{ margin-top:12px; font-size:15px; color:#D3D9E8; }
+
+  /* HOW IT WORKS */
+  .steps{ display:grid; grid-template-columns:repeat(4,1fr); gap:0 24px; }
+  .step{ position:relative; }
+  .step .num{
+    font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--cyan);
+    border:1px solid var(--ink-line); width:30px; height:30px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; margin-bottom:18px;
+  }
+  .step h3{ font-size:17px; margin-bottom:8px; font-weight:600; }
+  .step p{ font-size:14px; color:var(--muted); }
+  .step:not(:last-child)::after{
+    content:''; position:absolute; top:15px; left:calc(100% + 6px); width:calc(24px - 12px);
+    height:1px; background:var(--ink-line);
+  }
+
+  /* PRICING */
+  .plans{ display:flex; justify-content:center; }
+  .plan{
+    background:var(--ink-soft); border:1px solid var(--ink-line); border-radius:18px;
+    padding:40px 44px; max-width:420px; width:100%;
+  }
+  .plan.featured{ border-color:var(--indigo); }
+  .plan h3{ font-size:20px; text-align:center; }
+  .plan .price{ font-family:'Space Grotesk',sans-serif; font-size:46px; margin:16px 0 4px; text-align:center; }
+  .plan .price span{ font-family:'Inter',sans-serif; font-size:14px; color:var(--muted); }
+  .plan .setup{ font-size:13px; color:var(--muted); margin-bottom:26px; text-align:center; }
+  .plan .setup .old-price{ text-decoration:line-through; opacity:.55; margin-right:6px; }
+  .plan .setup .offer-price{ color:var(--cyan); font-weight:600; }
+  .plan .setup .offer-tag{
+    display:inline-block; margin-left:8px; font-family:'IBM Plex Mono',monospace;
+    font-size:10px; letter-spacing:.06em; color:var(--cyan); border:1px solid var(--cyan);
+    border-radius:100px; padding:2px 8px; text-transform:uppercase;
+  }
+  .plan ul{ list-style:none; }
+  .plan li{ font-size:14.5px; padding:9px 0; border-top:1px solid var(--ink-line); color:#D3D9E8; }
+  .plan li:first-child{ border-top:none; }
+  .plan .btn{ width:100%; text-align:center; margin-top:26px; }
+
+  /* CONTACT / FOOTER */
+  footer{ padding:84px 0 44px; border-top:1px solid var(--ink-line); }
+  .cta-block{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    flex-wrap:wrap; gap:28px; margin-bottom:64px;
+  }
+  .cta-block h2{ font-size:clamp(28px,4vw,42px); max-width:520px; }
+  .legal{
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:16px;
+    font-size:13px; color:var(--muted); padding-top:28px; border-top:1px solid var(--ink-line);
+  }
+  .legal .brand{ font-family:'Space Grotesk',sans-serif; color:var(--white); }
+
+  @media (max-width: 860px){
+    .hero .wrap{ grid-template-columns:1fr; }
+    .hero{ padding-top:56px; }
+    .hero-copy{ max-width:100%; }
+    .problem-grid, .plans{ grid-template-columns:1fr; }
+    .steps{ grid-template-columns:1fr 1fr; row-gap:32px; }
+    .step:not(:last-child)::after{ display:none; }
+    nav .links{ display:none; }
+    .cta-block{ flex-direction:column; align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <nav>
+      <div class="logo">Respond<span class="dash">‑</span>IA</div>
+      <div class="links">
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#planes">Planes</a>
+        <a href="#contacto">Contacto</a>
+      </div>
+      <a class="btn btn-primary" href="#contacto">Hablar por WhatsApp</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero" style="border-top:none; padding-top:96px;">
+    <div class="wrap">
+      <div class="hero-copy">
+        <span class="eyebrow">WhatsApp con IA para pymes chilenas</span>
+        <h1>Tu WhatsApp<br><em>nunca duerme.</em></h1>
+        <p class="lead">Respond‑IA contesta a tus clientes al instante, a cualquier hora del día, con las respuestas, precios y horarios de tu propio negocio. Tú sigues atendiendo el local — el chat lo cubrimos nosotros.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#contacto">Quiero mi bot</a>
+          <a class="btn btn-ghost" href="#como-funciona">Ver cómo funciona</a>
+        </div>
+        <p class="hero-note">Servicio operado desde Santiago, Chile · Persona natural con giro vigente ante el SII</p>
+      </div>
+
+      <div class="phone" aria-hidden="true">
+        <div class="phone-head">
+          <div class="avatar">FC</div>
+          <div>
+            <div class="name">Ferretería Los Álamos</div>
+            <div class="status">● en línea — Respond‑IA</div>
+          </div>
+        </div>
+
+        <div class="bubble-row them" style="animation-delay:.1s;">
+          <div class="bubble">Hola! tienen taladro percutor disponible? 🙂</div>
+        </div>
+        <div class="bubble-row them" style="animation-delay:.9s;">
+          <div class="typing"><span></span><span></span><span></span></div>
+        </div>
+        <div class="bubble-row me" style="animation-delay:2s;">
+          <div>
+            <div class="bubble">¡Hola! Sí, tenemos 2 modelos disponibles: Bosch GSB 550 ($42.990) y Makita HP1630 ($54.990). Retiro en tienda o despacho hoy mismo. ¿Cuál te acomoda?</div>
+            <div class="meta-row">23:41 <span class="check seen">✓✓</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="problema">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">El problema real</span>
+        <h2>Cada mensaje sin respuesta es una venta que se enfría.</h2>
+        <p>Tus clientes escriben cuando pueden — a las 8 de la noche, un domingo, o mientras estás con otro cliente en el local. Si la respuesta llega dos horas después, muchas veces ya compraron en otro lado.</p>
+      </div>
+      <div class="problem-grid">
+        <div class="problem-card">
+          <span class="tag">FUERA DE HORARIO</span>
+          <p>El 70% de las consultas por WhatsApp a pymes llegan fuera del horario de atención — de noche, fines de semana o festivos.</p>
+        </div>
+        <div class="problem-card">
+          <span class="tag">RESPUESTA LENTA</span>
+          <p>Mientras atiendes el mesón, la caja o una llamada, el chat se acumula y las preguntas simples (precio, horario, stock) quedan sin contestar.</p>
+        </div>
+        <div class="problem-card">
+          <span class="tag">SIN EQUIPO</span>
+          <p>Contratar a alguien solo para responder WhatsApp no es rentable para un negocio chico. Respond‑IA cuesta una fracción de eso.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="como-funciona">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Cómo funciona</span>
+        <h2>De la primera conversación al bot funcionando, en días — no semanas.</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <h3>Nos cuentas tu negocio</h3>
+          <p>Productos o servicios, precios, horarios, preguntas frecuentes y el tono con el que le hablas a tus clientes.</p>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <h3>Armamos tu bot</h3>
+          <p>Entrenamos la IA con la información real de tu negocio, no respuestas genéricas.</p>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <h3>Conectamos tu número</h3>
+          <p>Tu mismo número de WhatsApp Business queda activo con el bot, sin que tus clientes noten el cambio.</p>
+        </div>
+        <div class="step">
+          <div class="num">4</div>
+          <h3>Empieza a responder</h3>
+          <p>Desde ese momento, cada consulta se responde al instante — y tú revisas las conversaciones cuando quieras.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="planes">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Planes</span>
+        <h2>Un precio simple, sin letra chica.</h2>
+        <p>Pago único de instalación y una suscripción mensual mientras uses el servicio. Cancelas cuando quieras.</p>
+      </div>
+      <div class="plans">
+        <div class="plan featured">
+          <h3>Respond‑IA</h3>
+          <div class="price">$19.990 <span>/ mes</span></div>
+          <div class="setup"><span class="old-price">$49.990</span><span class="offer-price">$10.000</span> instalación única<span class="offer-tag">Oferta</span></div>
+          <ul>
+            <li>Bot entrenado con tu negocio</li>
+            <li>1 número de WhatsApp</li>
+            <li>Respuestas ilimitadas</li>
+            <li>Catálogo de productos integrado</li>
+            <li>Derivación a un humano cuando el bot no puede resolver</li>
+            <li>Ajustes de contenido cuando los necesites</li>
+          </ul>
+          <a class="btn btn-primary" href="#contacto">Quiero mi bot</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer id="contacto">
+  <div class="wrap">
+    <div class="cta-block">
+      <h2>¿Listo para que tu WhatsApp responda solo?</h2>
+      <a class="btn btn-primary" href="https://wa.me/56952487487?text=Hola%2C%20quiero%20saber%20m%C3%A1s%20de%20Respond-IA" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>
+    </div>
+    <div class="legal">
+      <span><span class="brand">Respond‑IA</span> — Automatización de WhatsApp con IA para pymes · Santiago, Chile</span>
+      <span>juanandresbudge1@gmail.com · +56 9 5248 7487 · Persona natural, giro Consultoría de Informática (SII 620200)</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
